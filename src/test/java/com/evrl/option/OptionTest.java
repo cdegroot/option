@@ -4,6 +4,7 @@ package com.evrl.option;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static com.evrl.option.Option.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,11 +12,12 @@ import java.util.Map;
 import com.google.common.base.Function;
 import org.junit.Test;
 
+
 public class OptionTest {
 
     @Test
     public void testNone() {
-        Option none = Option.none();
+        Option none = none();
         assertThat(none.isAvailable(), is(false));
         assertThat(none.get(), is((Object) null));
     }
@@ -25,6 +27,10 @@ public class OptionTest {
         Option<String> some = Option.of("String");
         assertThat(some.isAvailable(), is(true));
         assertThat(some.get(), is("String"));
+
+        // Alternatively
+        Option<String> some2 = some("String");
+        assertThat(some2.isAvailable(), is(true));
     }
 
     @Test
@@ -63,6 +69,21 @@ public class OptionTest {
         // for good measure, now with defaults
         Integer value = none.bind(f).orElse(0);
         assertThat(value, is(0));
+    }
+
+    @Test
+    public void liftFunctions() {
+        Option<String> some = Option.of("Hello");
+        Function<String, Integer> plainFunction = new Function<String, Integer>() {
+            @Override
+            public Integer apply(java.lang.String s) {
+                return s.length();
+            }
+        };
+
+        Option<Integer> result = some.bind(lift(plainFunction));
+        assertThat(result.isAvailable(), is(true));
+        assertThat(result.get(), is(5));
     }
 
     @Test

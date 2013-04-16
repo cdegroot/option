@@ -4,8 +4,19 @@ import com.google.common.base.Function;
 
 public abstract class Option<T> implements Iterable<T> {
 
+    /**
+     * Explicitely create a None value.
+     * @param <A>
+     * @return
+     */
     public static<A> Option<A> none() { return new None<A>(); }
 
+    /**
+     * Create an option.
+     * @param value
+     * @param <A>
+     * @return
+     */
     public static<A> Option<A> of(A value) {
         if (value == null) {
             return new None<A>();
@@ -13,6 +24,24 @@ public abstract class Option<T> implements Iterable<T> {
             return new Some(value);
         }
     }
+
+    /**
+     * Syntactic sugar for of(). So you can write "Option.of(foo)" or "some(foo)".
+     */
+    public static<A> Option<A> some(A value) { return of(value); }
+
+    /**
+     * Lift a function A -> B to A -> Option<B>
+     */
+    public static<A,B> Function<A,Option<B>> lift(final Function<A,B> f) {
+        return new Function<A, Option<B>>() {
+            @Override
+            public Option<B> apply(A a) {
+                return some(f.apply(a));
+            }
+        };
+    }
+
 
     /**
      * Check whether a value is available in this option.
